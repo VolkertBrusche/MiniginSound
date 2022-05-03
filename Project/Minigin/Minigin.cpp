@@ -16,7 +16,6 @@
 //================================
 
 #include "Commands.h"
-#include "Sound_Systems.h"
 
 using namespace std;
 
@@ -207,5 +206,7 @@ void dae::Minigin::TestSound() const
 
 	servicelocator::GetSoundSystem().InitializeSoundSystem();
 	servicelocator::GetSoundSystem().RegisterSound(0, "../Data/15_Jingle_06.wav");
-	servicelocator::GetSoundSystem().PlaySound(0, 1);
+
+	auto& input = InputManager::GetInstance();
+	input.SetButtonCommand(0, XBox360Controller::ControllerButton::DPadUp, new PlaySound(), CommandState::Down);
 }

@@ -2,6 +2,7 @@
 #include <iostream>
 #include "Scene.h"
 #include "GameObject.h"
+#include "Sound_Systems.h"
 
 namespace dae
 {
@@ -39,6 +40,16 @@ namespace dae
 	public:
 		void Execute() override { std::cout << "Player Swapped Gun!\n"; }
 		void Undo() override { std::cout << "Undo Player Swap Gun!\n"; }
+	};
+
+	class PlaySound final : public Command
+	{
+	public:
+		void Execute() override 
+		{
+			servicelocator::GetSoundSystem().PlaySound(0, 1);
+		}
+		void Undo() override{}
 	};
 }
 
