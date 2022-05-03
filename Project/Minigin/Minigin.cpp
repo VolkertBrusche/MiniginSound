@@ -16,6 +16,7 @@
 //================================
 
 #include "Commands.h"
+#include "Sound_Systems.h"
 
 using namespace std;
 
@@ -36,7 +37,7 @@ void dae::Minigin::Initialize()
 {
 	PrintSDLVersion();
 	
-	if (SDL_Init(SDL_INIT_VIDEO) != 0) 
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) 
 	{
 		throw std::runtime_error(std::string("SDL_Init Error: ") + SDL_GetError());
 	}
@@ -68,6 +69,7 @@ void dae::Minigin::LoadGame() const
 	CreateFPSCounter();
 	TestParenting();
 	TestInput();
+	TestSound();
 }
 
 void dae::Minigin::Cleanup()
@@ -193,4 +195,17 @@ void dae::Minigin::TestInput() const
 	input.SetButtonCommand(0, XBox360Controller::ControllerButton::ButtonY, new SwapGunCommand(), CommandState::Down);
 	input.SetButtonCommand(0, XBox360Controller::ControllerButton::DPadLeft, new SwapGunCommand(), CommandState::Down);
 	input.RemoveButtonCommand(0, XBox360Controller::ControllerButton::DPadLeft);
+}
+
+void dae::Minigin::TestSound() const
+{
+#if _DEBUG
+	servicelocator::RegisterSoundSystem(std::make_shared<LoggingSoundSystem>(std::make_shared<SDLSoundSystem>()));
+#else
+	servicelocator::RegisterSoundSystem(std::make_shared<SDLSoundSystem>());
+#endif
+
+	servicelocator::GetSoundSystem().InitializeSoundSystem();
+	servicelocator::GetSoundSystem().RegisterSound(0, "../Data/15_Jingle_06.wav");
+	servicelocator::GetSoundSystem().PlaySound(0, 1);
 }

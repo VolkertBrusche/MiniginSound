@@ -209,6 +209,7 @@ xcopy $(SolutionDir)3rdParty\SDL2_mixer-2.0.4\lib\x64\*.dll $(OutputPath) /R /Y<
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AudioClip.h" />
     <ClInclude Include="BaseComponent.h" />
     <ClInclude Include="Commands.h" />
     <ClInclude Include="Font.h" />
@@ -230,6 +231,7 @@ xcopy $(SolutionDir)3rdParty\SDL2_mixer-2.0.4\lib\x64\*.dll $(OutputPath) /R /Y<
     <ClInclude Include="XBox360Controller.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AudioClip.cpp" />
     <ClCompile Include="BaseComponent.cpp" />
     <ClCompile Include="Commands.cpp" />
     <ClCompile Include="Font.cpp" />

@@ -14,6 +14,7 @@ namespace dae
 		void CreateFPSCounter() const;
 		void TestParenting() const;
 		void TestInput() const;
+		void TestSound() const;
 
 		static const int MsPerFrame = 16; //16 for 60 fps, 33 for 30 fps
 		float m_TimeStamp = 0.02f; //Fixed timestamp for FixedUpdate() (default from UnityEngine)

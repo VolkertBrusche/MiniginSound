@@ -1,71 +1,98 @@
 #pragma once
-#include <memory>
-#include "SDL_mixer.h"
+#include <mutex>
+#include "AudioClip.h"
 
-using sound_id = unsigned short;
-class base_sound_system
+using SoundId = unsigned short;
+class BaseSoundSystem
 {
 public:
-	virtual ~base_sound_system() = default;
-	virtual void play(const sound_id id, const float volume) = 0;
-	virtual void register_sound(const sound_id id, const std::string& path) = 0;
+	virtual ~BaseSoundSystem() = default;
+	virtual void InitializeSoundSystem() = 0;
+	virtual void PlaySound(const SoundId id, const float volume) = 0;
+	virtual void RegisterSound(const SoundId id, const std::string& path) = 0;
 };
 
-class sdl_sound_system final : public base_sound_system
+class SDLSoundSystem final : public BaseSoundSystem
 {
 public:
-	void register_sound(const sound_id id, const std::string& path) //https://www.libsdl.org/projects/SDL_mixer/docs/SDL_mixer_19.html#SEC19 source of code in this function
+	SDLSoundSystem() = default;
+
+	virtual ~SDLSoundSystem()
 	{
-		Mix_Chunk* sample;
-		sample = Mix_LoadWAV(path.c_str());
-		if (!sample)
-			printf("Mix_LoadWav: %s\n", Mix_GetError());
+		Mix_CloseAudio();
 	}
 
-	void play(const sound_id id, const float volume) override
+	void InitializeSoundSystem() override
 	{
-		auto audioclip = audioclips[id];
-		if (!audioclip->is_loaded())
-			audioclip->load();
-		audioclip->set_volume((int)(volume * 100));
-		audioclip->play();
+		if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) == -1)
+		{
+			printf("Mix_OpenAudio: %s\n", Mix_GetError());
+			exit(2);
+		}
+
+		m_pAudioclips.resize(m_MaxClips);
+	}
+
+	void RegisterSound(const SoundId id, const std::string& fileName)
+	{
+
+		m_pAudioclips[id] = std::make_shared<AudioClip>(fileName);
+	}
+
+	void PlaySound(const SoundId id, const float volume) override
+	{
+		if (id > m_pAudioclips.size())
+			return;
+
+		auto audioclip = m_pAudioclips[id];
+		if (!audioclip->IsLoaded())
+			audioclip->LoadSound();
+		audioclip->SetVolume((int)(volume * 100));
+		audioclip->PlaySound();
 	}
 private:
-	std::vector<Mix_Chunk*> audioclips;
+	size_t m_MaxClips{ 50 };
+	std::vector<std::shared_ptr<AudioClip>> m_pAudioclips;
 };
 
-class logging_sound_system final : public base_sound_system
+class LoggingSoundSystem final : public BaseSoundSystem
 {
-	base_sound_system* _real_ss;
+	std::shared_ptr<BaseSoundSystem> _real_ss;
 public:
-	logging_sound_system(base_sound_system* ss) : _real_ss{ss}{}
-	~logging_sound_system() { delete _real_ss; }
+	LoggingSoundSystem(std::shared_ptr<BaseSoundSystem> ss) : _real_ss{ss}{}
+	virtual ~LoggingSoundSystem() {};
 
-	void register_sound(const sound_id id, const std::string& path) override {
-		_real_ss->register_sound(id, path);
+	void InitializeSoundSystem() override
+	{
+		_real_ss->InitializeSoundSystem();
+		std::cout << "Initializing sound system" << std::endl;
 	}
-	void play(const sound_id id, const float volume) override {
-		_real_ss->play(id, volume);
+	void RegisterSound(const SoundId id, const std::string& path) override {
+		_real_ss->RegisterSound(id, path);
+		std::cout << "registering sound with name: " << path << " and id: " << id << std::endl;
+	}
+	void PlaySound(const SoundId id, const float volume) override {
+		_real_ss->PlaySound(id, volume);
 		std::cout << "playing " << id << " at volume " << volume << std::endl;
 	}
 };
 
-class null_sound_system final : public base_sound_system
+class NullSoundSystem final : public BaseSoundSystem
 {
-	void play(const sound_id, const float) override{}
+	void InitializeSoundSystem() override{}
+	void PlaySound(const SoundId, const float) override{}
+	void RegisterSound(const SoundId, const std::string&) override{}
 };
 
 class servicelocator final
 {
 public:
-	static base_sound_system& get_sound_system() { return *ss_Instance.get(); }
-	static void register_sound_system(std::shared_ptr<base_sound_system> ss) { 
-		ss_Instance = ss == nullptr ? _default_ss : ss; 
+	static BaseSoundSystem& GetSoundSystem() { return *ss_Instance.get(); }
+	static void RegisterSoundSystem(std::shared_ptr<BaseSoundSystem> ss) {
+		ss_Instance = ss == nullptr ? std::make_shared<NullSoundSystem>(ss_Default) : ss;
 	}
 
 private:
-	static std::shared_ptr<base_sound_system> ss_Instance;
-	static std::shared_ptr<null_sound_system> _default_ss;
+	static std::shared_ptr<BaseSoundSystem> ss_Instance;
+	static NullSoundSystem ss_Default;
 };
-std::shared_ptr<base_sound_system> servicelocator::ss_Instance = _default_ss;
-std::shared_ptr<null_sound_system> servicelocator::_default_ss;
