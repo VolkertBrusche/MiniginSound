@@ -47,7 +47,7 @@ namespace dae
 	public:
 		void Execute() override 
 		{
-			servicelocator::GetSoundSystem().PlaySound(0, 1);
+			ServiceLocator::GetSoundSystem().PlaySound(0, 1);
 		}
 		void Undo() override{}
 	};

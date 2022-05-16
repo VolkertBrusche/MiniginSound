@@ -199,13 +199,13 @@ void dae::Minigin::TestInput() const
 void dae::Minigin::TestSound() const
 {
 #if _DEBUG
-	servicelocator::RegisterSoundSystem(std::make_shared<LoggingSoundSystem>(std::make_shared<SDLSoundSystem>()));
+	ServiceLocator::RegisterSoundSystem(std::make_shared<LoggingSoundSystem>(std::make_shared<SDLSoundSystem>()));
 #else
-	servicelocator::RegisterSoundSystem(std::make_shared<SDLSoundSystem>());
+	ServiceLocator::RegisterSoundSystem(std::make_shared<SDLSoundSystem>());
 #endif
 
-	servicelocator::GetSoundSystem().InitializeSoundSystem();
-	servicelocator::GetSoundSystem().RegisterSound(0, "../Data/15_Jingle_06.wav");
+	ServiceLocator::GetSoundSystem().InitializeSoundSystem();
+	ServiceLocator::GetSoundSystem().RegisterSound(0, "../Data/15_Jingle_06.wav");
 
 	auto& input = InputManager::GetInstance();
 	input.SetButtonCommand(0, XBox360Controller::ControllerButton::DPadUp, new PlaySound(), CommandState::Down);

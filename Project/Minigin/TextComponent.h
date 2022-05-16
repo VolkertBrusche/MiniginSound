@@ -16,7 +16,7 @@ namespace dae
 		void SetText(const std::string& text);
 		void SetColor(const SDL_Color color);
 
-		explicit TextComponent(const std::string& text, const std::shared_ptr<Font>& font, std::shared_ptr<GameObject> gameObject);
+		explicit TextComponent(const std::string& text, const std::shared_ptr<Font> font, std::shared_ptr<GameObject> gameObject);
 		virtual ~TextComponent() = default;
 		TextComponent(const TextComponent& other) = delete;
 		TextComponent(TextComponent&& other) = delete;
